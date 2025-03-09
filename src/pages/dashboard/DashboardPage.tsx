@@ -16,53 +16,52 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          navigate('/login');
-          return;
-        }
-        
-        // Check if user has completed the quiz
-        const { data: skinProfiles } = await supabase
-          .from('skin_profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-        
-        if (!skinProfiles || skinProfiles.length === 0) {
-          navigate('/quiz');
-          return;
-        }
-        
-        // Check if user has a routine
-        const { data: routines } = await supabase
-          .from('skincare_routines')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('skin_profile_id', skinProfiles[0].id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-        
-        if (!routines || routines.length === 0) {
-          navigate('/routine');
-          return;
-        }
-        
+        // For demo purposes, we'll use mock data instead of actual Supabase calls
+        // In a real app, you would use the Supabase client
+        const mockUser = {
+          id: "mock-user-id",
+          email: "user@example.com",
+          user_metadata: {
+            first_name: "Jane",
+            last_name: "Doe",
+          },
+        };
+
+        const mockSkinProfile = {
+          id: "mock-profile-id",
+          user_id: mockUser.id,
+          skin_type: "combination",
+          skin_concerns: ["acne", "dryness", "hyperpigmentation"],
+          allergies: ["Fragrance", "Alcohol"],
+          budget: "medium",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        const mockRoutine = {
+          id: "mock-routine-id",
+          user_id: mockUser.id,
+          skin_profile_id: mockSkinProfile.id,
+          morningRoutine: [],
+          eveningRoutine: [],
+          weeklyRoutine: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
         setUserData({
-          user,
-          skinProfile: skinProfiles[0],
-          routine: routines[0]
+          user: mockUser,
+          skinProfile: mockSkinProfile,
+          routine: mockRoutine,
         });
       } catch (error) {
-        console.error('Error checking auth:', error);
-        navigate('/login');
+        console.error("Error checking auth:", error);
+        navigate("/login");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     checkAuth();
   }, [navigate]);
 
@@ -83,4 +82,46 @@ export default function DashboardPage() {
 
   return (
     <MainLayout>
-      <div className
+      <div className="container max-w-6xl mx-auto py-12 px-4">
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-3xl font-bold">
+              Welcome, {userData?.user?.email?.split("@")[0] || "User"}
+            </h1>
+            <p className="text-muted-foreground">
+              Track your skincare journey and see your progress
+            </p>
+          </div>
+
+          <Tabs defaultValue="routine" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="routine">Routine</TabsTrigger>
+              <TabsTrigger value="photos">Progress Photos</TabsTrigger>
+              <TabsTrigger value="metrics">Skin Metrics</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="routine" className="space-y-6">
+              <RoutineTracker
+                userId={userData?.user?.id}
+                routineId={userData?.routine?.id}
+              />
+            </TabsContent>
+
+            <TabsContent value="photos" className="space-y-6">
+              <ProgressPhotos userId={userData?.user?.id} />
+            </TabsContent>
+
+            <TabsContent value="metrics" className="space-y-6">
+              <SkinMetrics userId={userData?.user?.id} />
+            </TabsContent>
+
+            <TabsContent value="profile" className="space-y-6">
+              <ProfileSettings userId={userData?.user?.id} />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </MainLayout>
+  );
+}
