@@ -167,6 +167,22 @@ export async function saveProgressLog(
     throw error;
   }
 
+  // If a photo URL was provided, also save it to the progress_photos table
+  if (photoUrl) {
+    try {
+      await supabase.from("progress_photos").insert({
+        user_id: userId,
+        photo_url: photoUrl,
+        date: date,
+        title: `Photo from ${date}`,
+        created_at: new Date().toISOString(),
+      });
+    } catch (photoError) {
+      console.error("Error saving photo reference:", photoError);
+      // Continue even if photo reference save fails
+    }
+  }
+
   return data;
 }
 

@@ -343,11 +343,13 @@ export default function RoutineTracker({
                         step.product.category.slice(1)}
                     </Badge>
                     <Checkbox
-                      id={`step-${step.order}`}
-                      checked={completedSteps[step.productId] || false}
+                      id={`step-morning-${step.order}`}
+                      checked={
+                        completedSteps[`morning-${step.productId}`] || false
+                      }
                       onCheckedChange={(checked) =>
                         handleCheckStep(
-                          step.productId,
+                          `morning-${step.productId}`,
                           step.productId,
                           !!checked,
                         )
@@ -420,10 +422,12 @@ export default function RoutineTracker({
                     </Badge>
                     <Checkbox
                       id={`step-evening-${step.order}`}
-                      checked={completedSteps[step.productId] || false}
+                      checked={
+                        completedSteps[`evening-${step.productId}`] || false
+                      }
                       onCheckedChange={(checked) =>
                         handleCheckStep(
-                          step.productId,
+                          `evening-${step.productId}`,
                           step.productId,
                           !!checked,
                         )
@@ -503,10 +507,12 @@ export default function RoutineTracker({
                       </Badge>
                       <Checkbox
                         id={`step-weekly-${step.order}`}
-                        checked={completedSteps[step.productId] || false}
+                        checked={
+                          completedSteps[`weekly-${step.productId}`] || false
+                        }
                         onCheckedChange={(checked) =>
                           handleCheckStep(
-                            step.productId,
+                            `weekly-${step.productId}`,
                             step.productId,
                             !!checked,
                           )
