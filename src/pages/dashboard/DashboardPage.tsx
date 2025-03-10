@@ -8,6 +8,7 @@ import RoutineTracker from "./components/RoutineTracker";
 import ProgressPhotos from "./components/ProgressPhotos";
 import SkinMetrics from "./components/SkinMetrics";
 import ProfileSettings from "./components/ProfileSettings";
+import DashboardOverview from "./components/DashboardOverview";
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -101,20 +102,20 @@ export default function DashboardPage() {
       <div className="container max-w-6xl mx-auto py-12 px-4">
         <div className="space-y-8">
           <div>
-            <h1 className="text-3xl font-bold">
-              Welcome, {userData?.user?.email?.split("@")[0] || "User"}
+            <h1 className="text-3xl font-bold text-pink-400">
+              Your Skincare Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Track your skincare journey and see your progress
+              Track your progress and maintain your skincare routine
             </p>
           </div>
 
-          <Tabs defaultValue="routine" className="space-y-6 mt-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="routine">Routine</TabsTrigger>
-              <TabsTrigger value="photos">Progress Photos</TabsTrigger>
-              <TabsTrigger value="metrics">Skin Metrics</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+          <DashboardOverview />
+
+          <Tabs defaultValue="routine" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="routine">Morning Routine</TabsTrigger>
+              <TabsTrigger value="evening">Evening Routine</TabsTrigger>
             </TabsList>
 
             <TabsContent value="routine" className="space-y-6">
@@ -124,16 +125,12 @@ export default function DashboardPage() {
               />
             </TabsContent>
 
-            <TabsContent value="photos" className="space-y-6">
-              <ProgressPhotos userId={userData?.user?.id} />
-            </TabsContent>
-
-            <TabsContent value="metrics" className="space-y-6">
-              <SkinMetrics userId={userData?.user?.id} />
-            </TabsContent>
-
-            <TabsContent value="profile" className="space-y-6">
-              <ProfileSettings userId={userData?.user?.id} />
+            <TabsContent value="evening" className="space-y-6">
+              <RoutineTracker
+                userId={userData?.user?.id}
+                routineId={userData?.routine?.id}
+                defaultTab="evening"
+              />
             </TabsContent>
           </Tabs>
         </div>

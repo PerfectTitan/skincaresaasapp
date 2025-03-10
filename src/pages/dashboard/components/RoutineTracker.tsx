@@ -1,30 +1,24 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/lib/supabase";
 import { saveProgressLog } from "@/lib/database";
 import { ProgressLog, CompletedStep, RoutineStep } from "@/types";
-import { Droplets, Sparkles, Shield, Sun } from "lucide-react";
+import { Sun } from "lucide-react";
 
 interface RoutineTrackerProps {
   userId: string;
   routineId: string;
+  defaultTab?: string;
 }
 
-export default function RoutineTracker({
-  userId,
-  routineId,
-}: RoutineTrackerProps) {
+export default function RoutineTracker(props: RoutineTrackerProps) {
+  const { userId, routineId } = props;
   const [routine, setRoutine] = useState<any>(null);
   const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>(
     {},
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("morning");
+  const [activeTab, setActiveTab] = useState(props.defaultTab || "morning");
   const [todayLog, setTodayLog] = useState<ProgressLog | null>(null);
 
   useEffect(() => {
@@ -67,7 +61,7 @@ export default function RoutineTracker({
                 productId: "t1",
                 product: {
                   id: "t1",
-                  name: "Hydrating Toner",
+                  name: "Brightening Toner",
                   brand: "Klairs",
                   category: "toner",
                   description:
@@ -82,10 +76,45 @@ export default function RoutineTracker({
               },
               {
                 order: 3,
+                productId: "s1",
+                product: {
+                  id: "s1",
+                  name: "Hydrating Serum",
+                  brand: "The Ordinary",
+                  category: "serum",
+                  description:
+                    "Hydrating serum that plumps skin and reduces fine lines.",
+                  price: 7.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Apply a few drops to face and neck, gently pat into skin.",
+              },
+              {
+                order: 4,
+                productId: "m1",
+                product: {
+                  id: "m1",
+                  name: "Daily Moisturizer",
+                  brand: "CeraVe",
+                  category: "moisturizer",
+                  description:
+                    "Lightweight moisturizer with ceramides and hyaluronic acid.",
+                  price: 13.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1593560368921-892072b8d81c?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions: "Apply a small amount to face and neck.",
+              },
+              {
+                order: 5,
                 productId: "ss1",
                 product: {
                   id: "ss1",
-                  name: "Ultra-Light Daily UV Defense SPF 50",
+                  name: "SPF 50 Sunscreen",
                   brand: "Kiehl's",
                   category: "sunscreen",
                   description:
@@ -154,44 +183,7 @@ export default function RoutineTracker({
                 instructions: "Apply a small amount to face and neck.",
               },
             ],
-            weekly_routine: [
-              {
-                order: 1,
-                productId: "e1",
-                product: {
-                  id: "e1",
-                  name: "AHA 30% + BHA 2% Peeling Solution",
-                  brand: "The Ordinary",
-                  category: "exfoliator",
-                  description:
-                    "Chemical exfoliant that improves skin texture and brightness.",
-                  price: 7.99,
-                  imageUrl:
-                    "https://images.unsplash.com/photo-1567721913486-6585f069b332?w=300&q=80",
-                },
-                frequency: "weekly",
-                instructions:
-                  "Apply to clean, dry skin. Leave on for no more than 10 minutes, then rinse thoroughly.",
-              },
-              {
-                order: 2,
-                productId: "ma1",
-                product: {
-                  id: "ma1",
-                  name: "Hydrating Overnight Mask",
-                  brand: "Laneige",
-                  category: "mask",
-                  description:
-                    "Overnight mask that deeply hydrates and plumps skin.",
-                  price: 25.99,
-                  imageUrl:
-                    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&q=80",
-                },
-                frequency: "weekly",
-                instructions:
-                  "Apply as the last step of your evening routine 1-2 times per week.",
-              },
-            ],
+            weekly_routine: [],
           };
           setRoutine(mockRoutine);
         } else {
@@ -211,7 +203,7 @@ export default function RoutineTracker({
           setTodayLog(logData);
           // Convert completed steps to a record for easier access
           const completed: Record<string, boolean> = {};
-          logData.completedSteps.forEach((step: CompletedStep) => {
+          logData.completed_steps.forEach((step: CompletedStep) => {
             completed[step.routineStepId] = step.completed;
           });
           setCompletedSteps(completed);
@@ -265,25 +257,19 @@ export default function RoutineTracker({
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   if (!routine) {
     return (
-      <Card>
-        <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">
-            No routine found. Please complete the skin quiz.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="pt-6">
+        <p className="text-center text-muted-foreground">
+          No routine found. Please complete the skin quiz.
+        </p>
+      </div>
     );
   }
 
@@ -301,276 +287,87 @@ export default function RoutineTracker({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col space-y-2">
-          <CardTitle>Your Personalized Skincare Routine</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Based on your quiz answers, we've created a custom routine just for
-            you.
-          </p>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Tabs
-          defaultValue="morning"
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="morning" className="text-base py-3">
-              Morning Routine
-            </TabsTrigger>
-            <TabsTrigger value="evening" className="text-base py-3">
-              Evening Routine
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="morning" className="space-y-6">
-            {getRoutineForTab().length > 0 ? (
-              getRoutineForTab().map((step: RoutineStep) => (
-                <div
-                  key={step.order}
-                  className="flex flex-col space-y-3 p-4 border rounded-lg bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      variant="outline"
-                      className="bg-primary/10 text-primary font-medium px-3 py-1"
-                    >
-                      Step {step.order}:{" "}
-                      {step.product.category.charAt(0).toUpperCase() +
-                        step.product.category.slice(1)}
-                    </Badge>
-                    <Checkbox
-                      id={`step-morning-${step.order}`}
-                      checked={
-                        completedSteps[`morning-${step.productId}`] || false
-                      }
-                      onCheckedChange={(checked) =>
-                        handleCheckStep(
-                          `morning-${step.productId}`,
-                          step.productId,
-                          !!checked,
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                      <img
-                        src={step.product.imageUrl}
-                        alt={step.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-lg">
-                        {step.product.name}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        GlowSage
-                      </p>
-                      <p className="text-sm">{step.product.description}</p>
-                    </div>
-                  </div>
-
-                  {step.instructions && (
-                    <div className="text-sm bg-muted p-3 rounded-md">
-                      <span className="font-medium">How to use:</span>{" "}
-                      {step.instructions}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 space-y-4">
-                <div className="flex justify-center">
-                  <Sun className="h-12 w-12 text-primary opacity-50" />
-                </div>
-                <h3 className="text-lg font-medium">No morning routine yet</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Take the skin assessment quiz to get personalized morning
-                  routine recommendations.
-                </p>
-                <Button
-                  onClick={() => (window.location.href = "/quiz")}
-                  className="mt-2"
-                >
-                  Take Skin Quiz
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="evening" className="space-y-6">
-            {routine.evening_routine && routine.evening_routine.length > 0 ? (
-              routine.evening_routine.map((step: RoutineStep) => (
-                <div
-                  key={step.order}
-                  className="flex flex-col space-y-3 p-4 border rounded-lg bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between">
-                    <Badge
-                      variant="outline"
-                      className="bg-secondary/10 text-secondary font-medium px-3 py-1"
-                    >
-                      Step {step.order}:{" "}
-                      {step.product.category.charAt(0).toUpperCase() +
-                        step.product.category.slice(1)}
-                    </Badge>
-                    <Checkbox
-                      id={`step-evening-${step.order}`}
-                      checked={
-                        completedSteps[`evening-${step.productId}`] || false
-                      }
-                      onCheckedChange={(checked) =>
-                        handleCheckStep(
-                          `evening-${step.productId}`,
-                          step.productId,
-                          !!checked,
-                        )
-                      }
-                    />
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                      <img
-                        src={step.product.imageUrl}
-                        alt={step.product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-lg">
-                        {step.product.name}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-1">
-                        GlowSage
-                      </p>
-                      <p className="text-sm">{step.product.description}</p>
-                    </div>
-                  </div>
-
-                  {step.instructions && (
-                    <div className="text-sm bg-muted p-3 rounded-md">
-                      <span className="font-medium">How to use:</span>{" "}
-                      {step.instructions}
-                    </div>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-12 space-y-4">
-                <div className="flex justify-center">
-                  <Sparkles className="h-12 w-12 text-secondary opacity-50" />
-                </div>
-                <h3 className="text-lg font-medium">No evening routine yet</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Take the skin assessment quiz to get personalized evening
-                  routine recommendations.
-                </p>
-                <Button
-                  onClick={() => (window.location.href = "/quiz")}
-                  className="mt-2"
-                >
-                  Take Skin Quiz
-                </Button>
-              </div>
-            )}
-          </TabsContent>
-
-          <div className="mt-8 pt-4 border-t">
-            <TabsList className="w-full">
-              <TabsTrigger value="weekly" className="w-full text-base py-3">
-                Weekly Treatments
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="weekly" className="space-y-6 mt-6">
-              {routine.weekly_routine && routine.weekly_routine.length > 0 ? (
-                routine.weekly_routine.map((step: RoutineStep) => (
-                  <div
-                    key={step.order}
-                    className="flex flex-col space-y-3 p-4 border rounded-lg bg-white hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center justify-between">
-                      <Badge
-                        variant="outline"
-                        className="bg-accent/50 text-secondary font-medium px-3 py-1"
-                      >
-                        Weekly:{" "}
-                        {step.product.category.charAt(0).toUpperCase() +
-                          step.product.category.slice(1)}
-                      </Badge>
-                      <Checkbox
-                        id={`step-weekly-${step.order}`}
-                        checked={
-                          completedSteps[`weekly-${step.productId}`] || false
-                        }
-                        onCheckedChange={(checked) =>
-                          handleCheckStep(
-                            `weekly-${step.productId}`,
-                            step.productId,
-                            !!checked,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-muted">
-                        <img
-                          src={step.product.imageUrl}
-                          alt={step.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg">
-                          {step.product.name}
-                        </h4>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          GlowSage
-                        </p>
-                        <p className="text-sm">{step.product.description}</p>
-                      </div>
-                    </div>
-
-                    {step.instructions && (
-                      <div className="text-sm bg-muted p-3 rounded-md">
-                        <span className="font-medium">How to use:</span>{" "}
-                        {step.instructions}
-                      </div>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-12 space-y-4">
-                  <div className="flex justify-center">
-                    <Shield className="h-12 w-12 text-accent-foreground opacity-50" />
-                  </div>
-                  <h3 className="text-lg font-medium">
-                    No weekly treatments yet
-                  </h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    Take the skin assessment quiz to get personalized weekly
-                    treatment recommendations.
-                  </p>
-                  <Button
-                    onClick={() => (window.location.href = "/quiz")}
-                    className="mt-2"
-                  >
-                    Take Skin Quiz
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-medium">
+          {activeTab === "morning" ? "Morning Steps" : "Evening Steps"}
+        </h2>
+        <div className="flex items-center">
+          <div className="bg-gray-200 h-2 w-16 rounded-full overflow-hidden mr-2">
+            <div className="bg-primary h-full" style={{ width: "80%" }}></div>
           </div>
-        </Tabs>
-      </CardContent>
-    </Card>
+          <span className="text-sm">80% Complete</span>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {getRoutineForTab().length > 0 ? (
+          getRoutineForTab().map((step: RoutineStep) => (
+            <div
+              key={step.order}
+              className="flex items-center border rounded-lg p-4 relative overflow-hidden"
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+              <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 mr-4">
+                <img
+                  src={step.product.imageUrl}
+                  alt={step.product.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1">
+                <h4 className="font-medium">{step.product.name}</h4>
+                <p className="text-xs text-muted-foreground">
+                  Step {step.order}
+                </p>
+              </div>
+              <div>
+                {completedSteps[`${activeTab}-${step.productId}`] ? (
+                  <Button
+                    size="sm"
+                    className="bg-green-500 hover:bg-green-600"
+                    disabled
+                  >
+                    Completed
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="hover:bg-primary hover:text-white"
+                    onClick={() =>
+                      handleCheckStep(
+                        `${activeTab}-${step.productId}`,
+                        step.productId,
+                        true,
+                      )
+                    }
+                  >
+                    Mark Complete
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 space-y-4">
+            <div className="flex justify-center">
+              <Sun className="h-12 w-12 text-primary opacity-50" />
+            </div>
+            <h3 className="text-lg font-medium">No routine yet</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Take the skin assessment quiz to get personalized routine
+              recommendations.
+            </p>
+            <Button
+              onClick={() => (window.location.href = "/quiz")}
+              className="mt-2"
+            >
+              Take Skin Quiz
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
