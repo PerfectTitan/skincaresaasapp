@@ -35,11 +35,11 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 flex items-center justify-center">
               <img
                 src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80"
                 alt="Skincare products"
-                className="rounded-lg shadow-lg w-full"
+                className="rounded-lg shadow-lg w-full h-[350px] object-cover"
               />
             </div>
           </div>
