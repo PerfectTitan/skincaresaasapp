@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MainLayout from "@/components/layout/MainLayout";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -37,20 +37,25 @@ export default function LoginPage() {
     },
   });
 
+  const { signIn, user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (data: LoginFormValues) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      const { error: signInError } = await signIn(data.email, data.password);
 
       if (signInError) throw signInError;
 
-      // Redirect to dashboard after successful login
-      navigate("/dashboard");
+      // Auth context will handle the redirect
     } catch (err: any) {
       setError(err.message || "Invalid login credentials");
     } finally {

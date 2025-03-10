@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import MainLayout from "@/components/layout/MainLayout";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const signupSchema = z
   .object({
@@ -32,6 +32,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -44,23 +45,26 @@ export default function SignupPage() {
     },
   });
 
+  const { signUp, user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
   const onSubmit = async (data: SignupFormValues) => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
+      const { error: signUpError } = await signUp(data.email, data.password);
 
       if (signUpError) throw signUpError;
 
-      // Redirect to quiz after successful signup
-      navigate("/quiz");
+      // Show success message
+      setSuccess(true);
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
     } finally {
@@ -82,6 +86,15 @@ export default function SignupPage() {
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert>
+              <AlertDescription>
+                Registration successful! Please check your email to verify your
+                account.
+              </AlertDescription>
             </Alert>
           )}
 
