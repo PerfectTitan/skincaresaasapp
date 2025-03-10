@@ -63,9 +63,9 @@ export default function DashboardPage() {
             id: "default-routine-id",
             user_id: user.id,
             skin_profile_id: "default-profile-id",
-            morningRoutine: [],
-            eveningRoutine: [],
-            weeklyRoutine: [],
+            morning_routine: [],
+            evening_routine: [],
+            weekly_routine: [],
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
@@ -109,7 +109,7 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <Tabs defaultValue="routine" className="space-y-6">
+          <Tabs defaultValue="routine" className="space-y-6 mt-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="routine">Routine</TabsTrigger>
               <TabsTrigger value="photos">Progress Photos</TabsTrigger>
