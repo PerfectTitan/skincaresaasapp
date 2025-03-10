@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/lib/supabase";
 import { saveSkinMetrics } from "@/lib/database";
 import { SkinMetric } from "@/types";
@@ -141,17 +142,32 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="track">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="track">Track Today</TabsTrigger>
-            <TabsTrigger value="progress">View Progress</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger
+              value="track"
+              className="bg-white/50 data-[state=active]:bg-white"
+            >
+              Track Today
+            </TabsTrigger>
+            <TabsTrigger
+              value="progress"
+              className="bg-white/50 data-[state=active]:bg-white"
+            >
+              View Progress
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="track" className="space-y-4 mt-4">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Hydration Level</Label>
-                  <span className="text-sm text-muted-foreground">
+          <TabsContent value="track" className="space-y-4">
+            <div className="space-y-6 bg-white p-6 rounded-lg">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">Hydration</h3>
+                    <p className="text-xs text-gray-500">
+                      How hydrated does your skin feel?
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
                     {currentMetrics.hydrationLevel}%
                   </span>
                 </div>
@@ -160,6 +176,7 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
                   min={0}
                   max={100}
                   step={1}
+                  className="py-2"
                   onValueChange={(value) =>
                     setCurrentMetrics({
                       ...currentMetrics,
@@ -167,12 +184,21 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
                     })
                   }
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Very Dry</span>
+                  <span>Well Hydrated</span>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Oiliness</Label>
-                  <span className="text-sm text-muted-foreground">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">Oiliness</h3>
+                    <p className="text-xs text-gray-500">
+                      How oily does your skin feel today?
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
                     {currentMetrics.oiliness}%
                   </span>
                 </div>
@@ -181,34 +207,26 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
                   min={0}
                   max={100}
                   step={1}
+                  className="py-2"
                   onValueChange={(value) =>
                     setCurrentMetrics({ ...currentMetrics, oiliness: value[0] })
                   }
                 />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Redness</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {currentMetrics.redness}%
-                  </span>
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Not Oily</span>
+                  <span>Very Oily</span>
                 </div>
-                <Slider
-                  value={[currentMetrics.redness]}
-                  min={0}
-                  max={100}
-                  step={1}
-                  onValueChange={(value) =>
-                    setCurrentMetrics({ ...currentMetrics, redness: value[0] })
-                  }
-                />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Texture</Label>
-                  <span className="text-sm text-muted-foreground">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">Texture</h3>
+                    <p className="text-xs text-gray-500">
+                      How smooth does your skin feel?
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
                     {currentMetrics.texture}%
                   </span>
                 </div>
@@ -217,16 +235,26 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
                   min={0}
                   max={100}
                   step={1}
+                  className="py-2"
                   onValueChange={(value) =>
                     setCurrentMetrics({ ...currentMetrics, texture: value[0] })
                   }
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Rough</span>
+                  <span>Smooth</span>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label>Overall Skin Health</Label>
-                  <span className="text-sm text-muted-foreground">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">Overall Skin Health</h3>
+                    <p className="text-xs text-gray-500">
+                      How would you rate your skin today?
+                    </p>
+                  </div>
+                  <span className="text-sm font-medium bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
                     {currentMetrics.overall}%
                   </span>
                 </div>
@@ -235,14 +263,19 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
                   min={0}
                   max={100}
                   step={1}
+                  className="py-2"
                   onValueChange={(value) =>
                     setCurrentMetrics({ ...currentMetrics, overall: value[0] })
                   }
                 />
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>Needs Improvement</span>
+                  <span>Excellent</span>
+                </div>
               </div>
 
               <Button
-                className="w-full"
+                className="w-full bg-pink-500 hover:bg-pink-600 mt-4"
                 onClick={handleSaveMetrics}
                 disabled={isSaving}
               >
@@ -252,34 +285,116 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
           </TabsContent>
 
           <TabsContent value="progress" className="mt-4">
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Your skin health metrics over time:
-              </p>
+            <div className="bg-white p-6 rounded-lg">
+              <h3 className="font-medium mb-4">Your Progress Over Time</h3>
 
               {metrics.length > 0 ? (
                 <div className="space-y-6">
-                  {/* In a real app, this would be a chart */}
-                  {metrics.map((metric, index) => (
-                    <div
-                      key={metric.id}
-                      className="border rounded-md p-3 space-y-2"
-                    >
-                      <p className="font-medium">{metric.date}</p>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>Hydration: {metric.hydrationLevel}%</div>
-                        <div>Oiliness: {metric.oiliness}%</div>
-                        <div>Redness: {metric.redness}%</div>
-                        <div>Texture: {metric.texture}%</div>
-                        <div>Overall: {metric.overall}%</div>
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <h4 className="text-sm font-medium">Hydration</h4>
+                        <span className="text-sm text-pink-600 font-medium">
+                          +15%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex h-full">
+                          <div
+                            className="bg-gray-300 h-full"
+                            style={{ width: "40%" }}
+                          ></div>
+                          <div
+                            className="bg-pink-500 h-full"
+                            style={{ width: "25%" }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Last Month: 40%</span>
+                        <span>Current: 65%</span>
                       </div>
                     </div>
-                  ))}
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <h4 className="text-sm font-medium">Texture</h4>
+                        <span className="text-sm text-pink-600 font-medium">
+                          +20%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex h-full">
+                          <div
+                            className="bg-gray-300 h-full"
+                            style={{ width: "30%" }}
+                          ></div>
+                          <div
+                            className="bg-pink-500 h-full"
+                            style={{ width: "30%" }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Last Month: 30%</span>
+                        <span>Current: 50%</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <h4 className="text-sm font-medium">
+                          Overall Skin Health
+                        </h4>
+                        <span className="text-sm text-pink-600 font-medium">
+                          +25%
+                        </span>
+                      </div>
+                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div className="flex h-full">
+                          <div
+                            className="bg-gray-300 h-full"
+                            style={{ width: "35%" }}
+                          ></div>
+                          <div
+                            className="bg-pink-500 h-full"
+                            style={{ width: "25%" }}
+                          ></div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>Last Month: 35%</span>
+                        <span>Current: 60%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-100">
+                    <h4 className="text-sm font-medium mb-3">Recent Entries</h4>
+                    {metrics.map((metric, index) => (
+                      <div
+                        key={metric.id}
+                        className="border rounded-md p-3 mb-2 hover:bg-gray-50"
+                      >
+                        <div className="flex justify-between items-center">
+                          <p className="font-medium">{metric.date}</p>
+                          <span className="text-sm bg-pink-100 text-pink-600 px-2 py-1 rounded-full">
+                            {metric.overall}%
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  No metrics recorded yet. Start tracking today!
-                </p>
+                <div className="text-center py-8 space-y-4">
+                  <p className="text-gray-500">
+                    No metrics recorded yet. Start tracking today!
+                  </p>
+                  <Button className="bg-pink-500 hover:bg-pink-600">
+                    Track Your First Day
+                  </Button>
+                </div>
               )}
             </div>
           </TabsContent>
