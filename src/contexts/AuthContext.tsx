@@ -7,6 +7,7 @@ import {
 } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
+import { upsertProfile } from "@/lib/database";
 
 type AuthContextType = {
   session: Session | null;
@@ -52,15 +53,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    firstName?: string,
+    lastName?: string,
+  ) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
         },
       });
+
+      // Create profile in database if signup was successful
+      if (data.user && !error) {
+        try {
+          await upsertProfile(data.user, firstName, lastName);
+        } catch (profileError) {
+          console.error("Error creating user profile:", profileError);
+          // Continue even if profile creation fails - we can fix it later
+        }
+      }
+
       return { error };
     } catch (error) {
       console.error("Supabase signup error:", error);

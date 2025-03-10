@@ -515,11 +515,11 @@ export function generateMockRoutine(
 
   return {
     id: `routine-${Date.now()}`,
-    userId,
-    skinProfileId,
-    morningRoutine,
-    eveningRoutine,
-    weeklyRoutine,
+    userId: userId,
+    skinProfileId: skinProfileId,
+    morningRoutine: morningRoutine,
+    eveningRoutine: eveningRoutine,
+    weeklyRoutine: weeklyRoutine,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/lib/supabase";
+import { saveProgressLog } from "@/lib/database";
 import { ProgressLog, CompletedStep, RoutineStep } from "@/types";
 
 interface RoutineTrackerProps {
@@ -88,19 +89,11 @@ export default function RoutineTracker({
         // Update existing log
         await supabase
           .from("progress_logs")
-          .update({ completedSteps: completedStepsArray })
+          .update({ completed_steps: completedStepsArray })
           .eq("id", todayLog.id);
       } else {
-        // Create new log
-        const { data } = await supabase
-          .from("progress_logs")
-          .insert({
-            user_id: userId,
-            date: today,
-            completedSteps: completedStepsArray,
-          })
-          .select()
-          .single();
+        // Create new log using our database helper
+        const data = await saveProgressLog(userId, today, completedStepsArray);
 
         setTodayLog(data);
       }

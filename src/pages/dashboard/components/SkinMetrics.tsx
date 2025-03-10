@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { saveSkinMetrics } from "@/lib/database";
 import { SkinMetric } from "@/types";
 
 interface SkinMetricsProps {
@@ -103,16 +104,17 @@ export default function SkinMetrics({ userId }: SkinMetricsProps) {
         setIsSaving(false);
       }, 1000);
 
-      // Real implementation would be:
-      // await supabase.from('skin_metrics').insert({
-      //   user_id: userId,
-      //   date: new Date().toISOString(),
-      //   hydration_level: currentMetrics.hydrationLevel,
-      //   oiliness: currentMetrics.oiliness,
-      //   redness: currentMetrics.redness,
-      //   texture: currentMetrics.texture,
-      //   overall: currentMetrics.overall
-      // });
+      // In a real app, we would use our database helper
+      // const today = new Date().toISOString().split("T")[0];
+      // await saveSkinMetrics(
+      //   userId,
+      //   today,
+      //   currentMetrics.hydrationLevel,
+      //   currentMetrics.oiliness,
+      //   currentMetrics.redness,
+      //   currentMetrics.texture,
+      //   currentMetrics.overall
+      // );
     } catch (error) {
       console.error("Error saving metrics:", error);
     } finally {

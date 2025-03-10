@@ -14,6 +14,8 @@ import SkinConcernsStep from "./steps/SkinConcernsStep";
 import AllergiesStep from "./steps/AllergiesStep";
 import BudgetStep from "./steps/BudgetStep";
 import { supabase } from "@/lib/supabase";
+import { saveSkinProfile } from "@/lib/database";
+import { createFallbackSkinProfile } from "@/lib/fallbackData";
 
 const quizSchema = z.object({
   skinType: z.nativeEnum(SkinType),
@@ -70,16 +72,19 @@ export default function SkinQuizPage() {
         return;
       }
 
-      // Save quiz results to database
-      const { error } = await supabase.from("skin_profiles").insert({
-        user_id: user.id,
-        skin_type: data.skinType,
-        skin_concerns: data.skinConcerns,
-        allergies: data.allergies,
-        budget: data.budget,
-      });
-
-      if (error) throw error;
+      try {
+        // Save quiz results to database using our database helper
+        await saveSkinProfile(
+          user.id,
+          data.skinType,
+          data.skinConcerns,
+          data.allergies,
+          data.budget,
+        );
+      } catch (dbError) {
+        console.error("Database error:", dbError);
+        // Continue to routine page even if database save fails
+      }
 
       // Generate routine based on quiz results
       navigate("/routine");

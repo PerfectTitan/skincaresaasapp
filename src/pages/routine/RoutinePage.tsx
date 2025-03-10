@@ -22,6 +22,11 @@ import {
   Budget,
 } from "@/types";
 import { generateMockRoutine } from "@/lib/mockData";
+import { getLatestSkinProfile, saveSkincareRoutine } from "@/lib/database";
+import {
+  createFallbackSkinProfile,
+  createFallbackRoutine,
+} from "@/lib/fallbackData";
 
 export default function RoutinePage() {
   const [routine, setRoutine] = useState<SkincareRoutine | null>(null);
@@ -42,23 +47,16 @@ export default function RoutinePage() {
           return;
         }
 
-        // Check if user has a skin profile
-        const { data: skinProfiles } = await supabase
-          .from("skin_profiles")
-          .select("*")
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(1);
+        // Check if user has a skin profile using our database helper
+        const skinProfile = await getLatestSkinProfile(user.id);
 
-        if (!skinProfiles || skinProfiles.length === 0) {
+        if (!skinProfile) {
           navigate("/quiz");
           return;
         }
 
-        const skinProfile = skinProfiles[0];
-
         // Check if user already has a routine
-        const { data: routines } = await supabase
+        const { data: routines, error: routineError } = await supabase
           .from("skincare_routines")
           .select("*")
           .eq("user_id", user.id)
@@ -66,12 +64,17 @@ export default function RoutinePage() {
           .order("created_at", { ascending: false })
           .limit(1);
 
+        if (routineError) {
+          console.error("Error fetching routines:", routineError);
+        }
+
         if (routines && routines.length > 0) {
           setRoutine(routines[0]);
         } else {
           // Generate a new routine based on skin profile
           // In a real app, this would call an AI service
           // For now, we'll use mock data
+          console.log("Generating mock routine with profile:", skinProfile);
           const mockRoutine = generateMockRoutine({
             userId: user.id,
             skinProfileId: skinProfile.id,
@@ -79,17 +82,23 @@ export default function RoutinePage() {
             skinConcerns: skinProfile.skin_concerns as SkinConcern[],
             budget: skinProfile.budget as Budget,
           });
+          console.log("Generated mock routine:", mockRoutine);
 
-          // Save the routine to the database
-          const { data: newRoutine, error } = await supabase
-            .from("skincare_routines")
-            .insert(mockRoutine)
-            .select()
-            .single();
-
-          if (error) throw error;
-
-          setRoutine(newRoutine);
+          try {
+            // Save the routine to the database using our database helper
+            const newRoutine = await saveSkincareRoutine(
+              user.id,
+              skinProfile.id,
+              mockRoutine.morningRoutine,
+              mockRoutine.eveningRoutine,
+              mockRoutine.weeklyRoutine,
+            );
+            setRoutine(newRoutine);
+          } catch (dbError) {
+            console.error("Database error:", dbError);
+            // Use the mock routine even if database save fails
+            setRoutine(mockRoutine);
+          }
         }
       } catch (error) {
         console.error("Error fetching routine:", error);
@@ -171,37 +180,67 @@ export default function RoutinePage() {
             </TabsList>
 
             <TabsContent value="morning" className="space-y-4 mt-6">
-              {routine.morningRoutine.map((step, index) => (
-                <ProductCard
-                  key={index}
-                  product={step.product}
-                  step={index + 1}
-                  instructions={step.instructions}
-                />
-              ))}
+              {routine.morningRoutine && routine.morningRoutine.length > 0 ? (
+                routine.morningRoutine.map((step, index) => (
+                  <ProductCard
+                    key={index}
+                    product={step.product}
+                    step={index + 1}
+                    instructions={step.instructions}
+                  />
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="py-6">
+                    <p className="text-center text-muted-foreground">
+                      No morning routine steps found.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="evening" className="space-y-4 mt-6">
-              {routine.eveningRoutine.map((step, index) => (
-                <ProductCard
-                  key={index}
-                  product={step.product}
-                  step={index + 1}
-                  instructions={step.instructions}
-                />
-              ))}
+              {routine.eveningRoutine && routine.eveningRoutine.length > 0 ? (
+                routine.eveningRoutine.map((step, index) => (
+                  <ProductCard
+                    key={index}
+                    product={step.product}
+                    step={index + 1}
+                    instructions={step.instructions}
+                  />
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="py-6">
+                    <p className="text-center text-muted-foreground">
+                      No evening routine steps found.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="weekly" className="space-y-4 mt-6">
-              {routine.weeklyRoutine.map((step, index) => (
-                <ProductCard
-                  key={index}
-                  product={step.product}
-                  step={index + 1}
-                  instructions={step.instructions}
-                  frequency="Use 1-2 times per week"
-                />
-              ))}
+              {routine.weeklyRoutine && routine.weeklyRoutine.length > 0 ? (
+                routine.weeklyRoutine.map((step, index) => (
+                  <ProductCard
+                    key={index}
+                    product={step.product}
+                    step={index + 1}
+                    instructions={step.instructions}
+                    frequency="Use 1-2 times per week"
+                  />
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="py-6">
+                    <p className="text-center text-muted-foreground">
+                      No weekly treatments found.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
 

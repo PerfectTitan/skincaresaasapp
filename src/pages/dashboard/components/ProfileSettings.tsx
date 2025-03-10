@@ -23,6 +23,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/lib/supabase";
+import { upsertProfile } from "@/lib/database";
 
 interface ProfileSettingsProps {
   userId: string;
@@ -108,14 +109,16 @@ export default function ProfileSettings({ userId }: ProfileSettingsProps) {
       }, 1000);
 
       // Real implementation would be:
-      // await supabase.from('profiles').upsert({
-      //   id: userId,
-      //   first_name: data.firstName,
-      //   last_name: data.lastName,
-      //   notify_routine_reminders: data.notifyRoutineReminders,
-      //   notify_product_recommendations: data.notifyProductRecommendations,
-      //   notify_tips: data.notifyTips
-      // });
+      // const { data: { user } } = await supabase.auth.getUser();
+      // if (user) {
+      //   await upsertProfile(user, data.firstName, data.lastName);
+      //
+      //   await supabase.from('profiles').update({
+      //     notify_routine_reminders: data.notifyRoutineReminders,
+      //     notify_product_recommendations: data.notifyProductRecommendations,
+      //     notify_tips: data.notifyTips
+      //   }).eq('id', userId);
+      // }
       //
       // // Update email in Auth if changed
       // const { data: { user } } = await supabase.auth.getUser();

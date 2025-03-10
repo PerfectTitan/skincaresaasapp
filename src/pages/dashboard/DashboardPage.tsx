@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from "@/components/layout/MainLayout";
 import { supabase } from "@/lib/supabase";
+import { getLatestSkinProfile, getLatestSkincareRoutine } from "@/lib/database";
 import RoutineTracker from "./components/RoutineTracker";
 import ProgressPhotos from "./components/ProgressPhotos";
 import SkinMetrics from "./components/SkinMetrics";
@@ -16,43 +17,58 @@ export default function DashboardPage() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // For demo purposes, we'll use mock data instead of actual Supabase calls
-        // In a real app, you would use the Supabase client
-        const mockUser = {
-          id: "mock-user-id",
-          email: "user@example.com",
-          user_metadata: {
-            first_name: "Jane",
-            last_name: "Doe",
-          },
-        };
+        // Get current user from Supabase
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-        const mockSkinProfile = {
-          id: "mock-profile-id",
-          user_id: mockUser.id,
-          skin_type: "combination",
-          skin_concerns: ["acne", "dryness", "hyperpigmentation"],
-          allergies: ["Fragrance", "Alcohol"],
-          budget: "medium",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        if (!user) {
+          navigate("/login");
+          return;
+        }
 
-        const mockRoutine = {
-          id: "mock-routine-id",
-          user_id: mockUser.id,
-          skin_profile_id: mockSkinProfile.id,
-          morningRoutine: [],
-          eveningRoutine: [],
-          weeklyRoutine: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        // Get user's skin profile
+        const skinProfile = await getLatestSkinProfile(user.id);
 
+        // Get user's routine
+        let routine = null;
+        if (skinProfile) {
+          const { data: routines } = await supabase
+            .from("skincare_routines")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("skin_profile_id", skinProfile.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (routines && routines.length > 0) {
+            routine = routines[0];
+          }
+        }
+
+        // Set user data
         setUserData({
-          user: mockUser,
-          skinProfile: mockSkinProfile,
-          routine: mockRoutine,
+          user,
+          skinProfile: skinProfile || {
+            id: "default-profile-id",
+            user_id: user.id,
+            skin_type: "normal",
+            skin_concerns: [],
+            allergies: [],
+            budget: "medium",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+          routine: routine || {
+            id: "default-routine-id",
+            user_id: user.id,
+            skin_profile_id: "default-profile-id",
+            morningRoutine: [],
+            eveningRoutine: [],
+            weeklyRoutine: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
         });
       } catch (error) {
         console.error("Error checking auth:", error);
