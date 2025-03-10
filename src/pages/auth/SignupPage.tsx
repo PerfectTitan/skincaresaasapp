@@ -59,12 +59,18 @@ export default function SignupPage() {
       setIsLoading(true);
       setError(null);
 
-      const { error: signUpError } = await signUp(data.email, data.password);
+      try {
+        const { error: signUpError } = await signUp(data.email, data.password);
+        if (signUpError) throw signUpError;
 
-      if (signUpError) throw signUpError;
-
-      // Show success message
-      setSuccess(true);
+        // Show success message
+        setSuccess(true);
+      } catch (fetchError) {
+        console.error("Network error:", fetchError);
+        setError(
+          "Network error: Unable to connect to authentication service. Please check your internet connection and try again.",
+        );
+      }
     } catch (err: any) {
       setError(err.message || "An error occurred during signup");
     } finally {
