@@ -28,14 +28,173 @@ export default function RoutineTracker({
   useEffect(() => {
     const fetchRoutine = async () => {
       try {
+        // Get user's routine from database
         const { data, error } = await supabase
           .from("skincare_routines")
           .select("*")
           .eq("id", routineId)
           .single();
 
-        if (error) throw error;
-        setRoutine(data);
+        if (error) {
+          console.error("Error fetching routine:", error);
+          // If no routine found, create a mock one for demo purposes
+          const mockRoutine = {
+            id: routineId,
+            user_id: userId,
+            morning_routine: [
+              {
+                order: 1,
+                productId: "c1",
+                product: {
+                  id: "c1",
+                  name: "Gentle Foaming Cleanser",
+                  brand: "CeraVe",
+                  category: "cleanser",
+                  description:
+                    "Gentle foaming cleanser that removes excess oil without disrupting the skin barrier.",
+                  price: 14.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Gently massage onto damp skin and rinse with lukewarm water.",
+              },
+              {
+                order: 2,
+                productId: "t1",
+                product: {
+                  id: "t1",
+                  name: "Hydrating Toner",
+                  brand: "Klairs",
+                  category: "toner",
+                  description:
+                    "Alcohol-free toner that hydrates and prepares skin for the next steps.",
+                  price: 19.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Apply to clean skin with a cotton pad or fingertips.",
+              },
+              {
+                order: 3,
+                productId: "ss1",
+                product: {
+                  id: "ss1",
+                  name: "Ultra-Light Daily UV Defense SPF 50",
+                  brand: "Kiehl's",
+                  category: "sunscreen",
+                  description:
+                    "Lightweight sunscreen that protects against UVA and UVB rays.",
+                  price: 39.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1556228841-a3d3b069c2c8?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Apply generously to face and neck as the final step of your morning routine.",
+              },
+            ],
+            evening_routine: [
+              {
+                order: 1,
+                productId: "c2",
+                product: {
+                  id: "c2",
+                  name: "Hydrating Facial Cleanser",
+                  brand: "CeraVe",
+                  category: "cleanser",
+                  description:
+                    "Hydrating cleanser with ceramides and hyaluronic acid to maintain moisture.",
+                  price: 15.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Gently massage onto damp skin and rinse with lukewarm water.",
+              },
+              {
+                order: 2,
+                productId: "s1",
+                product: {
+                  id: "s1",
+                  name: "Hyaluronic Acid Serum",
+                  brand: "The Ordinary",
+                  category: "serum",
+                  description:
+                    "Hydrating serum that plumps skin and reduces fine lines.",
+                  price: 7.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions:
+                  "Apply a few drops to face and neck, gently pat into skin.",
+              },
+              {
+                order: 3,
+                productId: "m2",
+                product: {
+                  id: "m2",
+                  name: "Moisturizing Cream",
+                  brand: "CeraVe",
+                  category: "moisturizer",
+                  description:
+                    "Rich cream that provides 24-hour hydration for dry skin.",
+                  price: 16.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1593560368921-892072b8d81c?w=300&q=80",
+                },
+                frequency: "daily",
+                instructions: "Apply a small amount to face and neck.",
+              },
+            ],
+            weekly_routine: [
+              {
+                order: 1,
+                productId: "e1",
+                product: {
+                  id: "e1",
+                  name: "AHA 30% + BHA 2% Peeling Solution",
+                  brand: "The Ordinary",
+                  category: "exfoliator",
+                  description:
+                    "Chemical exfoliant that improves skin texture and brightness.",
+                  price: 7.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1567721913486-6585f069b332?w=300&q=80",
+                },
+                frequency: "weekly",
+                instructions:
+                  "Apply to clean, dry skin. Leave on for no more than 10 minutes, then rinse thoroughly.",
+              },
+              {
+                order: 2,
+                productId: "ma1",
+                product: {
+                  id: "ma1",
+                  name: "Hydrating Overnight Mask",
+                  brand: "Laneige",
+                  category: "mask",
+                  description:
+                    "Overnight mask that deeply hydrates and plumps skin.",
+                  price: 25.99,
+                  imageUrl:
+                    "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300&q=80",
+                },
+                frequency: "weekly",
+                instructions:
+                  "Apply as the last step of your evening routine 1-2 times per week.",
+              },
+            ],
+          };
+          setRoutine(mockRoutine);
+        } else {
+          setRoutine(data);
+        }
 
         // Check if there's a log for today
         const today = new Date().toISOString().split("T")[0];

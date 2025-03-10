@@ -149,6 +149,19 @@ export default function ProfileSettings({ userId }: ProfileSettingsProps) {
           email: data.email,
         });
       }
+
+      // Show success state
+      const saveButton = document.getElementById("save-profile-button");
+      if (saveButton) {
+        saveButton.textContent = "Saved!";
+        saveButton.classList.add("bg-green-500", "hover:bg-green-600");
+
+        // Reset button after 2 seconds
+        setTimeout(() => {
+          saveButton.textContent = "Save Changes";
+          saveButton.classList.remove("bg-green-500", "hover:bg-green-600");
+        }, 2000);
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
     } finally {
@@ -316,7 +329,11 @@ export default function ProfileSettings({ userId }: ProfileSettingsProps) {
               >
                 Retake Skin Quiz
               </Button>
-              <Button type="submit" disabled={isSaving}>
+              <Button
+                id="save-profile-button"
+                type="submit"
+                disabled={isSaving}
+              >
                 {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
