@@ -19,6 +19,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -76,18 +77,25 @@ export default function ProfileSettings({ userId }: ProfileSettingsProps) {
         }
 
         // Get profile data from Supabase Database
-        // In a real app, fetch from profiles table
-        // For now, we'll use mock data
-        const mockProfile = {
-          firstName: "Jane",
-          lastName: "Doe",
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        // Use profile data if available, otherwise use user metadata
+        const userData = {
+          firstName:
+            profile?.first_name || user.user_metadata?.first_name || "",
+          lastName: profile?.last_name || user.user_metadata?.last_name || "",
           email: user.email || "",
-          notifyRoutineReminders: true,
-          notifyProductRecommendations: true,
-          notifyTips: true,
+          notifyRoutineReminders: profile?.notify_routine_reminders ?? true,
+          notifyProductRecommendations:
+            profile?.notify_product_recommendations ?? true,
+          notifyTips: profile?.notify_tips ?? true,
         };
 
-        form.reset(mockProfile);
+        form.reset(userData);
       } catch (error) {
         console.error("Error fetching profile:", error);
       } finally {
@@ -102,29 +110,45 @@ export default function ProfileSettings({ userId }: ProfileSettingsProps) {
     try {
       setIsSaving(true);
 
-      // In a real app, save to Supabase
-      // For now, we'll just simulate the save
-      setTimeout(() => {
-        setIsSaving(false);
-      }, 1000);
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      // Real implementation would be:
-      // const { data: { user } } = await supabase.auth.getUser();
-      // if (user) {
-      //   await upsertProfile(user, data.firstName, data.lastName);
-      //
-      //   await supabase.from('profiles').update({
-      //     notify_routine_reminders: data.notifyRoutineReminders,
-      //     notify_product_recommendations: data.notifyProductRecommendations,
-      //     notify_tips: data.notifyTips
-      //   }).eq('id', userId);
-      // }
-      //
-      // // Update email in Auth if changed
-      // const { data: { user } } = await supabase.auth.getUser();
-      // if (user && user.email !== data.email) {
-      //   await supabase.auth.updateUser({ email: data.email });
-      // }
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      // Update profile in database
+      await supabase.from("profiles").upsert({
+        id: userId,
+        first_name: data.firstName,
+        last_name: data.lastName,
+        notify_routine_reminders: data.notifyRoutineReminders,
+        notify_product_recommendations: data.notifyProductRecommendations,
+        notify_tips: data.notifyTips,
+        updated_at: new Date().toISOString(),
+      });
+
+      // Update user metadata if needed
+      if (
+        user.user_metadata?.first_name !== data.firstName ||
+        user.user_metadata?.last_name !== data.lastName
+      ) {
+        await supabase.auth.updateUser({
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+          },
+        });
+      }
+
+      // Update email if changed
+      if (user.email !== data.email) {
+        await supabase.auth.updateUser({
+          email: data.email,
+        });
+      }
     } catch (error) {
       console.error("Error saving profile:", error);
     } finally {
